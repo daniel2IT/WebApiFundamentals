@@ -14,7 +14,6 @@ namespace TheCodeCamp.Data
     {
       Database.SetInitializer(new MigrateDatabaseToLatestVersion<CampContext, Configuration>());
     }
-
     public DbSet<Camp> Camps { get; set; }
     public DbSet<Speaker> Speakers { get; set; }
     public DbSet<Talk> Talks { get; set; }
