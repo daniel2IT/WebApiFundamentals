@@ -14,7 +14,8 @@ namespace TheCodeCamp.Data
         {
             // Rename VenueName , to just Venue
             CreateMap<Camp, CampModel>()
-                .ForMember(c => c.Venue, opt => opt.MapFrom(m => m.Location.VenueName));
+                .ForMember(c => c.Venue, opt => opt.MapFrom(m => m.Location.VenueName))
+                .ReverseMap();
         }
     }
 }

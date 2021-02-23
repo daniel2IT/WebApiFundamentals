@@ -39,7 +39,7 @@ namespace TheCodeCamp.Controllers
         }
 
         // localhost:6060/api/camps + /{moniker}
-        [Route("{moniker}")]
+        [Route("{moniker}", Name = "NewDanielCamp")]
         public async Task<IHttpActionResult> Get(string moniker)
         {
             try
@@ -68,6 +68,34 @@ namespace TheCodeCamp.Controllers
             {
                 return InternalServerError(ex);
             }
+        }
+
+        //Post
+        [Route()]
+        public async Task<IHttpActionResult> Post(CampModel modelForBinding)
+        {
+             try
+            {
+                if (ModelState.IsValid) 
+                {
+                    var camp = _mapper.Map<Camp>(modelForBinding);
+
+                    _repository.AddCamp(camp);
+
+                    if(await _repository.SaveChangesAsync())
+                    {
+                        var newModel = _mapper.Map<CampModel>(camp);
+
+                        return CreatedAtRoute("NewDanielCamp", new { moniker = newModel.Moniker }, newModel);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+            // tell that sent data isn't good
+            return BadRequest();
         }
     }
 }
