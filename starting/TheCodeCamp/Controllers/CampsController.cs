@@ -76,6 +76,12 @@ namespace TheCodeCamp.Controllers
         {
              try
             {
+                // we need our moniker(is uniq in our way .. so)
+                if (await _repository.GetCampAsync(modelForBinding.Moniker) != null)
+                {
+                    ModelState.AddModelError("Moniker", "Moniker in use");
+                   /* return BadRequest("Moniker in use");*/
+                }
                 if (ModelState.IsValid) 
                 {
                     var camp = _mapper.Map<Camp>(modelForBinding);
@@ -95,7 +101,7 @@ namespace TheCodeCamp.Controllers
                 return InternalServerError(ex);
             }
             // tell that sent data isn't good
-            return BadRequest();
+            return BadRequest(ModelState);
         }
     }
 }
