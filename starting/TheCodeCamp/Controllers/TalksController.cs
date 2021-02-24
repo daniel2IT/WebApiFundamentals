@@ -95,7 +95,7 @@ namespace TheCodeCamp.Controllers
                 return InternalServerError(ex);
             }
 
-            return BadRequest();
+            return BadRequest(ModelState);// ModelState - Contains all Validation Errors
         }
     }
 }
