@@ -25,14 +25,14 @@ namespace TheCodeCamp.Controllers
         {
             try
             {
-            var result = await _repository.GetAllCampsAsync(includeTalks);
+                var result = await _repository.GetAllCampsAsync(includeTalks);
 
                 // Mapping (Models)
                 var mappedResult = _mapper.Map<IEnumerable<CampModel>>(result);
 
                 return Ok(mappedResult);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return InternalServerError(ex);
             }
@@ -45,7 +45,7 @@ namespace TheCodeCamp.Controllers
             try
             {
                 var result = await _repository.GetCampAsync(moniker);
-                if (result == null){ return NotFound(); }
+                if (result == null) { return NotFound(); }
                 return Ok(_mapper.Map<CampModel>(result));
             }
             catch (Exception ex)
@@ -62,7 +62,7 @@ namespace TheCodeCamp.Controllers
             {
                 var result = await _repository.GetAllCampsByEventDate(eventDate, includeTalks);
 
-                return Ok(_mapper.Map<CampModel[]>(result));        
+                return Ok(_mapper.Map<CampModel[]>(result));
             }
             catch (Exception ex)
             {
@@ -74,21 +74,22 @@ namespace TheCodeCamp.Controllers
         [Route()]
         public async Task<IHttpActionResult> Post(CampModel modelForBinding)
         {
-             try
+            try
             {
-                // we need our moniker(is uniq in our way .. so)
-                if (await _repository.GetCampAsync(modelForBinding.Moniker) != null)
+                if (ModelState.IsValid)
                 {
-                    ModelState.AddModelError("Moniker", "Moniker in use");
-                   /* return BadRequest("Moniker in use");*/
-                }
-                if (ModelState.IsValid) 
-                {
+                    // we need our moniker(is uniq in our way .. so)
+                    if (await _repository.GetCampAsync(modelForBinding.Moniker) != null)
+                    {
+                        ModelState.AddModelError("Moniker", "Moniker in use");
+                        /* return BadRequest("Moniker in use");*/
+                    }
+
                     var camp = _mapper.Map<Camp>(modelForBinding);
 
                     _repository.AddCamp(camp);
 
-                    if(await _repository.SaveChangesAsync())
+                    if (await _repository.SaveChangesAsync())
                     {
                         var newModel = _mapper.Map<CampModel>(camp);
 
@@ -102,6 +103,58 @@ namespace TheCodeCamp.Controllers
             }
             // tell that sent data isn't good
             return BadRequest(ModelState);
+        }
+
+        // PUT
+        [Route("{moniker}")]
+        public async Task<IHttpActionResult> Put(string moniker, CampModel model)
+        {
+            try
+            {
+                var camp = await _repository.GetCampAsync(moniker);
+                if (camp == null) return NotFound();
+
+                _mapper.Map(model, camp);
+
+                if(await _repository.SaveChangesAsync())
+                {
+                    return Ok(_mapper.Map<CampModel>(camp));
+                }
+                else
+                {
+                    return InternalServerError();
+                }
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        //Delete
+        [Route("{moniker}")]
+        public async Task<IHttpActionResult> Delete(string moniker)
+        {
+            try
+            {
+                var camp = await _repository.GetCampAsync(moniker);
+                if (camp == null) return NotFound();
+
+                _repository.DeleteCamp(camp);
+
+                if(await _repository.SaveChangesAsync())
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return InternalServerError();
+                }
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
     }
 }
